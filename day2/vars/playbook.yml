@@ -1,0 +1,10 @@
+- name: try vars
+  hosts: host
+  vars:
+    package: nginx
+    state: absent
+  tasks:
+    - name: install nginx
+      ansible.builtin.apt:
+        name: "{{package}}"
+        state: "{{state}}"

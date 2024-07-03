@@ -1,0 +1,89 @@
+# Play for db server
+- name: first play for conf db servers
+  gather_facts: true
+  hosts: all
+  tasks:
+    - name: update apt repo
+      ansible.builtin.apt:
+        update_cache: yes
+      tags: always
+
+    - name: Install Initial Packages for PostgreSQL 15
+      ansible.builtin.apt:
+        name: "{{item}}"
+      loop:
+        - dirmngr
+        - ca-certificates
+        - software-properties-common
+        - apt-transport-https
+        - lsb-release
+        - curl
+      tags: db-v15
+      when: 
+        - inventory_hostname in groups['db_servers']  
+        - ansible_facts['distribution']=='Ubuntu'
+    
+    - name: execute some shell commands
+      ansible.builtin.shell:
+        cmd: |
+          curl -fSsL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | sudo tee /usr/share/keyrings/postgresql.gpg > /dev/null
+          echo deb [arch=amd64,arm64,ppc64el signed-by=/usr/share/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main | sudo tee /etc/apt/sources.list.d/postgresql.list
+      tags: db-v15
+      when: inventory_hostname in groups['db_servers']
+
+    - name: update apt repo for installation postgres db
+      ansible.builtin.apt:
+        update_cache: yes  
+      tags: db-v15
+      when: inventory_hostname in groups['db_servers']
+
+    - name: install postgres client and service db packages
+      ansible.builtin.apt:
+        name: "{{item}}"
+      tags: db-v15
+      loop:
+        - postgresql-client-15
+        - postgresql-15
+      when: inventory_hostname in groups['db_servers']
+
+    - name: Start service postgresql-15, if not started
+      ansible.builtin.service:
+        name: postgresql-15
+        state: started
+        enabled: true
+      tags: db-v15
+      when: inventory_hostname in groups['db_servers']
+
+    - name: install postgres 14 client and service db packages
+      ansible.builtin.apt:
+        name: "{{item}}"
+      tags: db-v14
+      loop:
+        - postgresql-client-14
+        - postgresql-14
+      when: inventory_hostname in groups['db_servers']
+
+- name: second playbook
+  hosts: all
+  gather_facts: true
+  tags: web
+  tasks:
+
+    - name: update repo 
+      ansible.builtin.apt:
+        update_cache: yes
+      when: inventory_hostname in groups['web_servers'] and ansible_facts['distribution'] == 'Ubuntu'
+
+
+    - name: install nginx
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+      when: inventory_hostname in groups['web_servers']  and ansible_facts['distribution'] == 'Ubuntu'
+
+    - name: install httpd
+      ansible.builtin.apt:
+        name: httpd
+        state: present
+      when: inventory_hostname in groups['web_servers']  and ansible_facts['distribution'] == 'CentOs'
+

@@ -1,0 +1,7 @@
+- name: inv vars
+  hosts: host
+  gather_facts: false
+  tasks:
+    - name: install nginx
+      ansible.builtin.debug:
+        msg: "package is {{package}} , {{state}} , {{ lookup('env', 'maro')}}"

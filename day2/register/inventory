@@ -1,0 +1,16 @@
+[web_servers]
+192.168.1.6 
+[db_servers]
+192.168.1.6
+
+
+
+[web_servers:vars]
+package=nginx  
+state=present
+
+
+[db_servers:vars]
+package14=postgresql-14
+state=present
+package15=postgresql-15

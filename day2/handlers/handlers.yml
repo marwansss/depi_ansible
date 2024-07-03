@@ -1,0 +1,17 @@
+- name: install nginx play
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: install apache
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+      notify: restart-apache
+
+
+  handlers:  
+    - name: restart-apache
+      ansible.builtin.service:
+        name: apache2
+        state: restarted
+        enabled: yes

@@ -1,0 +1,27 @@
+- name: check register value
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: cat inventory file
+      ansible.builtin.shell:
+        cmd:
+          cat /home/maro/ansible/day2/register/inventory
+
+      register: my_reg
+
+
+    - name: echo my_reg value
+      ansible.builtin.debug:
+        var: my_reg
+
+
+    - name: use when with registers (ok,change state)
+      ansible.builtin.apt:
+        name: codeblocks
+      when: my_reg.changed == true
+
+    - name: use when with registers (skip state)
+      ansible.builtin.apt:
+        name: codeblocks
+      when: my_reg.changed == true and ansible_facts['distribution'] == 'CentOs'
+

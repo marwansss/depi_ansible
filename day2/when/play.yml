@@ -1,0 +1,121 @@
+# Play for db server
+- name: first play for conf db servers
+  gather_facts: true
+  hosts: all
+  tasks:
+    - name: update apt repo
+      ansible.builtin.apt:
+        update_cache: yes
+      tags: always
+
+    - name: Install Initial Packages for PostgreSQL 15
+      ansible.builtin.apt:
+        name: dirmngr
+      tags: db-v15
+      when: 
+        - inventory_hostname in groups['db_servers']  
+        - ansible_facts['distribution']=='Ubuntu'
+
+    - name: Install cert
+      ansible.builtin.apt:
+        name: ca-certificates
+      tags: db-v15
+      when: inventory_hostname in groups['db_servers']
+
+
+    - name: Install some packages
+      ansible.builtin.apt:
+        name: software-properties-common
+      tags: db-v15
+      when: inventory_hostname in groups['db_servers']
+
+
+    - name: Install apt-transport
+      ansible.builtin.apt:
+        name: apt-transport-https
+      tags: db-v15
+      when: inventory_hostname in groups['db_servers']
+
+    - name: Install lsb
+      ansible.builtin.apt:
+        name: lsb-release
+      tags: db-v15
+      when: inventory_hostname in groups['db_servers']
+
+    - name: Install curl
+      ansible.builtin.apt:
+        name: curl
+      tags: db-v15
+      when: inventory_hostname in groups['db_servers']
+
+    - name: execute some shell commands
+      ansible.builtin.shell:
+        cmd: |
+          curl -fSsL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | sudo tee /usr/share/keyrings/postgresql.gpg > /dev/null
+          echo deb [arch=amd64,arm64,ppc64el signed-by=/usr/share/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main | sudo tee /etc/apt/sources.list.d/postgresql.list
+      tags: db-v15
+      when: inventory_hostname in groups['db_servers']
+
+    - name: update apt repo for installation postgres db
+      ansible.builtin.apt:
+        update_cache: yes  
+      tags: db-v15
+      when: inventory_hostname in groups['db_servers']
+
+    - name: install postgres client db packages
+      ansible.builtin.apt:
+        name: postgresql-client-15
+      tags: db-v15
+      when: inventory_hostname in groups['db_servers']
+
+    - name: install postgres db packages
+      ansible.builtin.apt:
+        name: postgresql-15
+      tags: db-v15
+      when: inventory_hostname in groups['db_servers']
+
+    - name: Start service postgresql-15, if not started
+      ansible.builtin.service:
+        name: postgresql-15
+        state: started
+        enabled: true
+      tags: db-v15
+      when: inventory_hostname in groups['db_servers']
+
+    - name: install postgres 14 client db packages
+      ansible.builtin.apt:
+        name: postgresql-client-14
+      tags: db-v14
+      when: inventory_hostname in groups['db_servers']
+
+    - name: install postgres db 14 packages
+      ansible.builtin.apt:
+        name: postgresql-14
+      tags: db-v14
+      when: inventory_hostname in groups['db_servers']
+
+
+- name: second playbook
+  hosts: all
+  gather_facts: true
+  tags: web
+  tasks:
+
+    - name: update repo 
+      ansible.builtin.apt:
+        update_cache: yes
+      when: inventory_hostname in groups['web_servers'] and ansible_facts['distribution'] == 'Ubuntu'
+
+
+    - name: install nginx
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+      when: inventory_hostname in groups['web_servers']  and ansible_facts['distribution'] == 'Ubuntu'
+
+    - name: install httpd
+      ansible.builtin.apt:
+        name: httpd
+        state: present
+      when: inventory_hostname in groups['web_servers']  and ansible_facts['distribution'] == 'CentOs'
+

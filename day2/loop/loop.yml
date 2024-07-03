@@ -1,0 +1,12 @@
+- name: play with loops
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: install more than one  package
+      ansible.builtin.apt:
+        name: "{{item.package_name}}"
+        state: "{{item.package_state}}"
+      loop:
+        - {package_name: "nginx" , package_state: "present"}
+        - {package_name: "mariadb-server" , package_state: "latest"}
+        - {package_name: "curl" , package_state: "absent"}

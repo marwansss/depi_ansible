@@ -1,0 +1,26 @@
+- name: play with handlers
+  hosts: 192.168.1.5
+  gather_facts: false
+  tasks:
+    #install apache on web server
+    - name: install apache
+      apt:
+        name: apache2
+        state: present
+      register: my_reg
+
+    #change apache port number when my_reg changed which mean that apache2 has been installed 
+    - name: change apache default port number
+      ansible.builtin.lineinfile:
+        path: /etc/apache2/ports.conf
+        regexp: 'Listen 80'
+        line: Listen 8080
+      notify: restart_apache
+      when: my_reg.changed == true
+
+# restart the service to make changes take effect
+  handlers:
+    - name: restart_apache
+      service:
+        name: apache2
+        state: restarted

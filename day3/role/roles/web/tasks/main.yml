@@ -1,0 +1,23 @@
+---
+# tasks file for web
+- name: install apache
+  apt:
+    name: apache2
+    state: present
+
+- name: Copy file with owner and permissions
+  ansible.builtin.copy:
+    src: index.html
+    dest: /var/www/html
+    owner: root
+    group: root
+    mode: '0755'
+
+
+- name: call the template file to change port number
+  template:
+    src: ports.conf.j2
+    dest: /etc/apache2/ports.conf
+  notify: restart_apache
+
+  

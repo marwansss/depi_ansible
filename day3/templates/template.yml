@@ -1,0 +1,13 @@
+- name: play with template
+  hosts: 192.168.1.8
+  gather_facts: false
+  vars_files:
+    - ./vars/main.yml
+  tasks:
+    - name: calling the template file
+      template:
+        src: ports.conf.j2
+        dest: /etc/apache2/ports.conf
+        owner: root
+        group: root
+        mode: '0755'

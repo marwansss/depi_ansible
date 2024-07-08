@@ -1,0 +1,10 @@
+---
+# tasks file for db
+- name: install initial packages for db
+  ansible.builtin.apt:
+    name: "{{item}}"
+    state: present
+  tags: v14
+  loop:
+    - postgresql-client-14
+    - postgresql-14

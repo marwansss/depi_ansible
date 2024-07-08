@@ -1,0 +1,10 @@
+- name: play with vault
+  hosts: 192.168.1.5
+  gather_facts: false
+  vars_files:
+    - ./secret.yml
+  tasks:
+    - name: Create user and password
+      user:
+        name: "{{username}}"
+        password: "{{userpass}}"

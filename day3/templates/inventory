@@ -1,0 +1,9 @@
+[db_servers]
+#db v14
+localhost 
+#db v15
+192.168.1.8
+
+
+[web_servers]
+192.168.1.5

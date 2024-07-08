@@ -1,0 +1,5 @@
+- name: trigger roles to be executed
+  hosts: web
+  roles:
+    - role: db
+    - role: web
